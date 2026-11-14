@@ -9,6 +9,6 @@
     "core:default",
     "opener:default",
     "dialog:default",
-    "shell:default"
+    "shell:allow-open"
   ]
 }

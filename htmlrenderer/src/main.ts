@@ -1,22 +1,16 @@
-import { invoke } from "@tauri-apps/api/core";
+import { open } from '@tauri-apps/plugin-dialog';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
-let greetInputEl: HTMLInputElement | null;
-let greetMsgEl: HTMLElement | null;
-
-async function greet() {
-  if (greetMsgEl && greetInputEl) {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsgEl.textContent = await invoke("greet", {
-      name: greetInputEl.value,
-    });
-  }
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    greet();
+document.getElementById('open-btn')?.addEventListener('click', async () => {
+  const filePath = await open({
+    multiple: false,
+    filters: [{ name: 'HTML', extensions: ['html', 'htm'] }]
   });
+  
+  if (filePath) {
+    // Converts the system file path to a Tauri asset:// protocol URL
+    const assetUrl = convertFileSrc(filePath);
+    // Navigate the webview directly to the local HTML file
+    window.location.href = assetUrl;
+  }
 });

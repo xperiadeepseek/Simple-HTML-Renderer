@@ -1,13 +1,3 @@
-name: Build Windows App
-
-# Allows you to manually trigger the build from the GitHub UI
-on:
-  workflow_dispatch: 
-
-# Grants the action permission to upload the .exe to the Releases page
-permissions:
-  contents: write 
-
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -29,9 +19,12 @@ jobs:
       - name: Cache Rust build files
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './src-tauri -> target'
+          # Point the cache to the nested src-tauri folder
+          workspaces: './htmlrenderer/src-tauri -> target'
           
       - name: Install Node dependencies
+        # Run npm install inside the htmlrenderer folder
+        working-directory: ./htmlrenderer
         run: npm install
         
       - name: Build Tauri App and create Release
@@ -39,7 +32,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # Automatically reads the version from your tauri.conf.json
+          # Tell the Tauri action where the project is located
+          projectPath: './htmlrenderer'
           tagName: v__VERSION__ 
           releaseName: 'App v__VERSION__'
           releaseDraft: true

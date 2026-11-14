@@ -1,0 +1,46 @@
+name: Build Windows App
+
+# Allows you to manually trigger the build from the GitHub UI
+on:
+  workflow_dispatch: 
+
+# Grants the action permission to upload the .exe to the Releases page
+permissions:
+  contents: write 
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+          
+      - name: Cache Rust build files
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+          
+      - name: Install Node dependencies
+        run: npm install
+        
+      - name: Build Tauri App and create Release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Automatically reads the version from your tauri.conf.json
+          tagName: v__VERSION__ 
+          releaseName: 'App v__VERSION__'
+          releaseDraft: true
+          prerelease: false

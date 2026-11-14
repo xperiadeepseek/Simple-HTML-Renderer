@@ -1,3 +1,12 @@
+name: Build Windows App
+
+# This block is what makes the "Run workflow" button appear
+on:
+  workflow_dispatch: 
+
+permissions:
+  contents: write 
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -19,11 +28,9 @@ jobs:
       - name: Cache Rust build files
         uses: swatinem/rust-cache@v2
         with:
-          # Point the cache to the nested src-tauri folder
           workspaces: './htmlrenderer/src-tauri -> target'
           
       - name: Install Node dependencies
-        # Run npm install inside the htmlrenderer folder
         working-directory: ./htmlrenderer
         run: npm install
         
@@ -32,7 +39,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # Tell the Tauri action where the project is located
           projectPath: './htmlrenderer'
           tagName: v__VERSION__ 
           releaseName: 'App v__VERSION__'
